@@ -1,3 +1,3 @@
-require "oss_active_record/core_ext"
+require "oss_active_record/searchable"
 module OssActiveRecord
 end
