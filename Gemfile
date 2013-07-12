@@ -11,4 +11,5 @@ gemspec
 # your gem to rubygems.org.
 
 # To use debugger
- gem 'pry'
+gem 'pry'
+gem 'oss_rb', :git => "https://github.com/OriPekelman/oss_rb"

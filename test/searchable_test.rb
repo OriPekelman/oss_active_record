@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative './test_helper'
  
-class SearchableTest < Test::Unit::TestCase
+class SearchableTest < ActiveSupport::TestCase
 end

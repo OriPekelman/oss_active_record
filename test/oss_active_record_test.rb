@@ -1,7 +1,7 @@
-require 'test_helper'
+require_relative './test_helper'
 
 class OssActiveRecordTest < ActiveSupport::TestCase
-  test "truth" do
+  test "OssActiveRecord is a module" do
     assert_kind_of Module, OssActiveRecord
   end
 end

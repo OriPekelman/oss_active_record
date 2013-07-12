@@ -1,6 +1,25 @@
 class Document < ActiveRecord::Base
-#  belongs_to :current_revision
-
+  #  belongs_to :current_revision
+  def folder
+    self.folder_id = 42
+    self
+    
+  end
+  
+  def current_revision
+    self.uuid= 42
+    self.user_id=42
+    self.state = 42
+    self
+  end
+  
+  def self.folder
+    Document
+  end
+  
+  def self.current_revision
+    Document
+  end
   searchable do
     integer  :id
     integer  :folder_id

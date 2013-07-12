@@ -1,8 +1,16 @@
+GIT
+  remote: https://github.com/OriPekelman/oss_rb
+  revision: 79fb70d4f1bf21bd5d3e9a10ba7e7f1bfaf0524f
+  specs:
+    oss_rb (0.0.1)
+      nokogiri
+      rest-client
+
 PATH
   remote: .
   specs:
     oss_active_record (0.0.1)
-      rails (~> 4.0.0.rc2)
+      rails (~> 4.0.0)
 
 GEM
   remote: https://rubygems.org/
@@ -43,8 +51,11 @@ GEM
       treetop (~> 1.4.8)
     method_source (0.8.1)
     mime-types (1.23)
+    mini_portile (0.5.1)
     minitest (4.7.5)
     multi_json (1.7.7)
+    nokogiri (1.6.0)
+      mini_portile (~> 0.5.0)
     polyglot (0.3.3)
     pry (0.9.12.2)
       coderay (~> 1.0.5)
@@ -67,6 +78,8 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     rake (10.1.0)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
     slop (3.4.5)
     sprockets (2.10.0)
       hike (~> 1.2)
@@ -92,5 +105,6 @@ PLATFORMS
 
 DEPENDENCIES
   oss_active_record!
+  oss_rb!
   pry
   sqlite3
