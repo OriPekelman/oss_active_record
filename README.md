@@ -8,7 +8,9 @@ Depends on OriPekelman/oss_rb
 
 Add this line to your application's Gemfile:
 
+    gem 'oss_rb', :github => "OriPekelman/oss_rb"
     gem 'oss_active_record', :github => "OriPekelman/oss_active_record"
+    
 
 And then execute:
 
