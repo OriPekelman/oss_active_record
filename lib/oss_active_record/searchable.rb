@@ -1,11 +1,96 @@
 module OssActiveRecord
   module Searchable
-    extend ActiveSupport::Concern
- 
-    included do
-    end
- 
+    extend ActiveSupport::Concern  
+
     def index
+      doc = self.to_indexable
+      oss_doc = Oss::Document.new
+      doc.each do |name,value|
+          oss_doc.add_field(name,value)
+      end
+      self.class.oss_index.add_document(oss_doc)
+      self.class.oss_index.index!
+      self.class.oss_index.empty_documents
+    end
+
+    
+    module ClassMethods
+      @@field_types= [:integer, :text, :string, :time] #supported field types
+      @@_fields=[]
+      @@index = nil
+      
+      def _fields
+        @@_fields
+      end
+      
+      def searchable(options = {}, &block)
+        yield
+        unless options[:auto_index] == false
+          after_save :index
+        end
+      end
+      
+      def oss_index
+        if @@index.nil?
+          @@index_name ||= self.name.downcase
+          @@index = Oss::Index.new(@@index_name, Rails.configuration.open_search_server_url)
+          create_schema!
+        end
+        @@index
+      end
+      
+      def add_field(name, type, block=nil)
+        @@_fields<<{:name => name, :type => type,:block => block}
+      end
+
+      def create_schema!
+        @@index.create('EMPTY_INDEX') unless @@index.list.include? @@index_name
+        @@_fields <<  {:name => "id", :type => "integer",:block => nil} if @@_fields.detect {|f| f[:name] == "id" }.nil?
+        @@_fields.each do |field|
+          create_schema_field!(field)
+        end
+      end
+
+      def reindex!
+        self.oss_index.delete!
+        self.create_schema!
+        
+        self.all.find_in_batches  do |group|
+          group.each { |doc| doc.index }
+        end
+      end
+      
+      def create_schema_field!(field)
+        params = {
+          'unique' => field[:name] == :id,
+          'default' => field[:name] == :id,
+          'name' => field[:name],
+          'analyzer' => 'StandardAnalyzer',#here probably we want to choose analysers by field[:type],
+          'stored' => true,
+          'indexed' => true
+        }
+        self.oss_index.set_field(params)
+      end
+      
+      def method_missing(method, *args, &block)
+        yield unless block.nil?
+        add_field args[0], method, block if @@field_types.include? method
+      end
+      
+      def search(*args, &block)
+        yield unless block.nil?
+        params = {
+          'query_template' => 'search',
+          'start' => 0,
+          'rows' => 10,
+          'rf' => @@_fields.map {|f|f[:name]}
+        }
+        self.oss_index.search(args[0], params)
+      end
+            
+    end
+
+    def to_indexable
       doc={}
       self.class._fields.each do |field|
         if field[:block].nil?
@@ -16,56 +101,6 @@ module OssActiveRecord
         doc[field[:name]]=val
       end
       doc
-    end
-    
-    def index!
-      doc = self.index
-      doc[:id] ||= SecureRandom.uuid
-      oss_doc = Oss::Document.new("en", doc[:id])  
-      doc.each do |name,value|
-          oss_doc.add_field(k,v)
-      end
-      index.add_document(oss_doc)
-    end
-    
- 
-    module ClassMethods
-      @@field_types= [:integer, :text, :string, :time] #supported field types
-      @@_fields=[]
-      
-      def _fields
-        @@_fields
-      end
-      
-      def searchable(options = {}, &block)
-        yield
-        unless options[:auto_index] == false
-          before_save :do_something_before
-          after_save :index
-        end
-      end
-      
-      def add_field(name, type, block=nil)
-        @@_fields<<{:name => name, :type => type,:block => block}
-      end
-
-      def create_schema!
-        @@_fields.each do |field|
-          create_schema_field!(field)
-        end
-      end
-
-      def create_schema_field!(field)
-      end
-      
-      def method_missing(method, *args, &block)  
-        add_field args[0], method, block if @@field_types.include? method
-      end
-      
-    end
-    
-
-    def search(*args, &block)
     end
 
   end

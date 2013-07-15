@@ -1,32 +1,12 @@
-class Document < ActiveRecord::Base
-  #  belongs_to :current_revision
-  def folder
-    self.folder_id = 42
-    self
-    
-  end
-  
-  def current_revision
-    self.uuid= 42
-    self.user_id=42
-    self.state = 42
-    self
-  end
-  
-  def self.folder
-    Document
-  end
-  
-  def self.current_revision
-    Document
-  end
-  
+class InvalidDocument < ActiveRecord::Base
+#  belongs_to :current_revision
+
   searchable do
     integer  :id
     integer  :folder_id
-    integer  :room_id           do folder.room_id end
+    glop  :room_id           do folder.room_id end
 
-    text     :name              # fulltext
+    plop     :name              # fulltext
     string   :name              # order_by
     time     :updated_at
 

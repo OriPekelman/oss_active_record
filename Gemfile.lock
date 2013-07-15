@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/OriPekelman/oss_rb
-  revision: 79fb70d4f1bf21bd5d3e9a10ba7e7f1bfaf0524f
+  revision: c405d970fc41c327b0266aa750ec4cbd4be7b0c1
   specs:
     oss_rb (0.0.1)
       nokogiri
