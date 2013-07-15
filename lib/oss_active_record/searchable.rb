@@ -85,7 +85,15 @@ module OssActiveRecord
           'rows' => 10,
           'rf' => @@_fields.map {|f|f[:name]}
         }
-        self.oss_index.search(args[0], params)
+        active_record_from_result self.oss_index.search(args[0], params)
+      end
+      
+      def get_ids_from_results(search_result)
+        search_result.css("result doc field[name='id']").map {|f|f.text.to_i}.uniq
+      end
+      
+      def active_record_from_result(search_result)
+        find get_ids_from_results(search_result)
       end
             
     end
