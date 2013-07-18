@@ -26,7 +26,7 @@ module OssActiveRecord
       def searchable(options = {}, &block)
         yield
         unless options[:auto_index] == false
-          after_save :index
+          after_commit :index
         end
       end
       
