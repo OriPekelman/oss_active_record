@@ -1,35 +1,33 @@
 module OssActiveRecord
   module Searchable
-    extend ActiveSupport::Concern  
-
+    extend ActiveSupport::Concern
     def index
       doc = self.to_indexable
       oss_doc = Oss::Document.new
       doc.each do |name,value|
-          oss_doc.add_field(name,value)
+        oss_doc.fields << Oss::Field.new(name, value)
       end
-      self.class.oss_index.add_document(oss_doc)
+      self.class.oss_index.documents << oss_doc
       self.class.oss_index.index!
-      self.class.oss_index.empty_documents
+      self.class.oss_index.documents = []
     end
 
-    
     module ClassMethods
       @@field_types= [:integer, :text, :string, :time] #supported field types
       @@_fields=[]
       @@index = nil
-      
+
       def _fields
         @@_fields
       end
-      
+
       def searchable(options = {}, &block)
         yield
         unless options[:auto_index] == false
           after_save :index
         end
       end
-      
+
       def oss_index
         if @@index.nil?
           @@index_name ||= self.name.downcase
@@ -38,7 +36,7 @@ module OssActiveRecord
         end
         @@index
       end
-      
+
       def add_field(name, type, block=nil)
         @@_fields<<{:name => name, :type => type,:block => block}
       end
@@ -54,29 +52,34 @@ module OssActiveRecord
       def reindex!
         self.oss_index.delete!
         self.create_schema!
-        
+
         self.all.find_in_batches  do |group|
           group.each { |doc| doc.index }
         end
       end
-      
+
       def create_schema_field!(field)
+        analyzers = { :text => 'StandardAnalyzer',  :integer => 'DecimalAnalyzer'}
+        analyzer = analyzers[field[:type]]
+        termVectors = { :text => 'POSITIONS_OFFSETS'}
+        termVector = termVectors[field[:type]] || 'NO'
+        name =  "#{field[:name]}|#{field[:type]}"
         params = {
-          'unique' => field[:name] == :id,
-          'default' => field[:name] == :id,
-          'name' => field[:name],
-          'analyzer' => 'StandardAnalyzer',#here probably we want to choose analysers by field[:type],
-          'stored' => true,
-          'indexed' => true
+          'name' => name,
+          'analyzer' => analyzer,
+          'stored' => 'YES',
+          'indexed' => 'YES',
+          'termVector' => termVector
         }
         self.oss_index.set_field(params)
+        self.oss_index.set_field_default_unique(name, name) if field[:name] == "id"
       end
-      
+
       def method_missing(method, *args, &block)
         yield unless block.nil?
         add_field args[0], method, block if @@field_types.include? method
       end
-      
+
       def search(*args, &block)
         yield unless block.nil?
         params = {
@@ -87,15 +90,15 @@ module OssActiveRecord
         }
         active_record_from_result self.oss_index.search(args[0], params)
       end
-      
+
       def get_ids_from_results(search_result)
         search_result.css("result doc field[name='id']").map {|f|f.text.to_i}.uniq
       end
-      
+
       def active_record_from_result(search_result)
         find get_ids_from_results(search_result)
       end
-            
+
     end
 
     def to_indexable
@@ -106,7 +109,7 @@ module OssActiveRecord
         else
           val = field[:block].call
         end
-        doc[field[:name]]=val
+        doc["#{field[:name]}|#{field[:type]}"]=val
       end
       doc
     end

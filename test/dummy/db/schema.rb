@@ -13,16 +13,10 @@
 
 ActiveRecord::Schema.define(version: 20130711150619) do
 
-  create_table "documents", force: true do |t|
-    t.integer  "folder_id"
-    t.integer  "room_id"
-    t.string   "name"
+  create_table "articles", force: true do |t|
+    t.string   "title"
+    t.string   "content"
     t.datetime "updated_at"
-    t.integer  "uuid"
-    t.integer  "user_id"
-    t.integer  "file_size"
-    t.string   "file_content_type"
-    t.string   "state"
     t.datetime "created_at"
   end
 
