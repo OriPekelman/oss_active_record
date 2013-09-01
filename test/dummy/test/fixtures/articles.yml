@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  id: 1
+  title: Talking
+  content: My beautiful article
+  updated_at: 2013-07-11 17:06:19
+
+two:
+  id: 2
+  title: Weather report
+  content: Another news about weather
+  updated_at: 2013-07-11 17:06:19

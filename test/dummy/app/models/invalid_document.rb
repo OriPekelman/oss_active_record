@@ -1,5 +1,5 @@
 class InvalidDocument < ActiveRecord::Base
-#  belongs_to :current_revision
+  #  belongs_to :current_revision
 
   searchable do
     integer  :id
@@ -16,5 +16,5 @@ class InvalidDocument < ActiveRecord::Base
     string   :file_content_type do current_revision.file_content_type end
     string   :state             do current_revision.state end
   end
-  
+
 end
