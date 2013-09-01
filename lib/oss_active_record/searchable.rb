@@ -9,7 +9,6 @@ module OssActiveRecord
       end
       self.class.oss_index.documents << oss_doc
       self.class.oss_index.index!
-      self.class.oss_index.documents = []
     end
 
     module ClassMethods
@@ -84,16 +83,11 @@ module OssActiveRecord
       end
 
       def search(*args, &block)
-        yield unless block.nil?
-        params = {
-          'query' => args[0],
-          'start' => 0,
-          'rows' => 10,
-          'returnedFields' => @@_fields.map {|f|"#{f[:name]}|#{f[:type]}"}
-        }
-        active_record_from_result self.oss_index.search_pattern(params)
+        searchRequest = SearchRequest.new(self.oss_index)
+        searchRequest.returns @@_fields.map {|f|"#{f[:name]}|#{f[:type]}"}
+        active_record_from_result searchRequest.execute(&block)
       end
-      
+
       def get_ids_from_results(search_result)
         ids = []
         id_field_name = "#{@@_field_id[:name]}|#{@@_field_id[:type]}"

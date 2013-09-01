@@ -7,10 +7,10 @@ class DocumentTest < ActiveSupport::TestCase
   
   test "Search" do
     @documents = Document.search(:include => { :current_revision => :user }) do
-         fulltext filters[:query]
-         with :room_id, room_id
-         paginate page: filters[:page], per_page: filters[:per]
+         fulltext 'test'
+         with :room_id, 1
+         paginate page: 1, per_page: 10
        end
-       @documents.results.each { |document| puts document }
+       @documents.each { |document| puts document }
   end
 end
