@@ -48,8 +48,8 @@ result = Person.search do
 	fulltext 'john'
 	with :age, 20
 	paginate page: 1, per_page: 10
-	order_by: score, :desc
-	order_by: id, :asc
+	order_by :score, :desc
+	order_by :id, :asc
 end
 @result.each { |person| puts person }
 ```
