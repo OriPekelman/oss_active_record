@@ -93,7 +93,7 @@ module OssActiveRecord
         }
         active_record_from_result self.oss_index.search_pattern(params)
       end
-
+      
       def get_ids_from_results(search_result)
         ids = []
         id_field_name = "#{@@_field_id[:name]}|#{@@_field_id[:type]}"
@@ -102,8 +102,7 @@ module OssActiveRecord
             ids << field['values'].map {|f|f.to_i}.uniq if field['fieldName'] == id_field_name
           end
         end
-        puts ids
-        # search_result.css("result doc field[name='id']").map {|f|f.text.to_i}.uniq
+        return ids
       end
 
       def active_record_from_result(search_result)
