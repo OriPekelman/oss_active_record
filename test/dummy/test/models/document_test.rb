@@ -10,7 +10,10 @@ class DocumentTest < ActiveSupport::TestCase
          fulltext 'test'
          with :room_id, 1
          paginate page: 1, per_page: 10
+         order_by :score, :desc
+         order_by :id
        end
        @documents.each { |document| puts document }
+       assert true
   end
 end

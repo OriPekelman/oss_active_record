@@ -11,7 +11,6 @@ class ArticleTest < ActiveSupport::TestCase
     articles = Article.search do
          fulltext 'title|text:weather'
        end
-    puts "ARTICLES #{articles}"
     assert articles.length == 1
     assert articles[0]['title'] == 'Weather report'
   end
