@@ -15,6 +15,7 @@ module OssActiveRecord
     module ClassMethods
       @@field_types= [:integer, :text, :string, :time] #supported field types
       @@_fields=[]
+      @@_field_id = nil
       @@index = nil
 
       def _fields
@@ -43,7 +44,9 @@ module OssActiveRecord
 
       def create_schema!
         @@index.create('EMPTY_INDEX') unless @@index.list.include? @@index_name
-        @@_fields <<  {:name => "id", :type => "integer",:block => nil} if @@_fields.detect {|f| f[:name] == "id" }.nil?
+        @@_field_id = @@_fields.detect {|f| f[:name] == :id }
+        @@_field_id = {:name => 'id', :type => 'integer',:block => nil} if @@_field_id.nil?
+        @@_fields <<  @@_field_id
         @@_fields.each do |field|
           create_schema_field!(field)
         end
@@ -60,7 +63,7 @@ module OssActiveRecord
 
       def create_schema_field!(field)
         analyzers = { :text => 'StandardAnalyzer',  :integer => 'DecimalAnalyzer'}
-        analyzer = analyzers[field[:type]]
+        analyzer = analyzers[field[:type]] if field[:name] != :id
         termVectors = { :text => 'POSITIONS_OFFSETS'}
         termVector = termVectors[field[:type]] || 'NO'
         name =  "#{field[:name]}|#{field[:type]}"
@@ -72,7 +75,7 @@ module OssActiveRecord
           'termVector' => termVector
         }
         self.oss_index.set_field(params)
-        self.oss_index.set_field_default_unique(name, name) if field[:name] == "id"
+        self.oss_index.set_field_default_unique(name, name) if field[:name] == :id
       end
 
       def method_missing(method, *args, &block)
@@ -83,16 +86,24 @@ module OssActiveRecord
       def search(*args, &block)
         yield unless block.nil?
         params = {
-          'query_template' => 'search',
+          'query' => args[0],
           'start' => 0,
           'rows' => 10,
-          'rf' => @@_fields.map {|f|f[:name]}
+          'returnedFields' => @@_fields.map {|f|"#{f[:name]}|#{f[:type]}"}
         }
-        active_record_from_result self.oss_index.search(args[0], params)
+        active_record_from_result self.oss_index.search_pattern(params)
       end
 
       def get_ids_from_results(search_result)
-        search_result.css("result doc field[name='id']").map {|f|f.text.to_i}.uniq
+        ids = []
+        id_field_name = "#{@@_field_id[:name]}|#{@@_field_id[:type]}"
+        search_result['documents'].each do |document|
+          document['fields'].each do |field|
+            ids << field['values'].map {|f|f.to_i}.uniq if field['fieldName'] == id_field_name
+          end
+        end
+        puts ids
+        # search_result.css("result doc field[name='id']").map {|f|f.text.to_i}.uniq
       end
 
       def active_record_from_result(search_result)

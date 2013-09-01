@@ -6,5 +6,6 @@ class ArticleTest < ActiveSupport::TestCase
     article.save
     article = Article.new(id: 2, title: 'Active record rocks', content: 'Using OpenSearchServer with active record is simple')
     article.save
+    puts Article.search("title|text:weather")
   end
 end
