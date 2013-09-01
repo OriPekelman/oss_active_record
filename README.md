@@ -44,7 +44,14 @@ Records are autonindexed by default.
 You can search by example:
 
 ```ruby
-Person.search("name:john*")
+result = Person.search do
+	fulltext 'john'
+	with :age, 20
+	paginate page: 1, per_page: 10
+	order_by: score, :desc
+	order_by: id, :asc
+end
+@result.each { |person| puts person }
 ```
 
 ## Contributing

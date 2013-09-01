@@ -9,7 +9,7 @@ class ArticleTest < ActiveSupport::TestCase
     article.save
     
     articles = Article.search do
-         fulltext 'title|text:weather'
+         fulltext 'weather'
        end
     assert articles.length == 1
     assert articles[0]['title'] == 'Weather report'
