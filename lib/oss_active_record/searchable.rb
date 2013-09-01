@@ -9,13 +9,14 @@ module OssActiveRecord
       end
       self.class.oss_index.documents << oss_doc
       self.class.oss_index.index!
-      self.class.oss_index.documents = []
     end
 
     module ClassMethods
       @@field_types= [:integer, :text, :string, :time] #supported field types
       @@_fields=[]
       @@_field_id = nil
+      @@_text_fields = {}
+      @@_sortable_fields = {}
       @@index = nil
 
       def _fields
@@ -70,10 +71,12 @@ module OssActiveRecord
         params = {
           'name' => name,
           'analyzer' => analyzer,
-          'stored' => 'YES',
+          'stored' => 'NO',
           'indexed' => 'YES',
           'termVector' => termVector
         }
+        @@_text_fields[field[:name]] = name if field[:type] == :text
+        @@_sortable_fields[field[:name]] = name unless field[:type] == :text
         self.oss_index.set_field(params)
         self.oss_index.set_field_default_unique(name, name) if field[:name] == :id
       end
@@ -84,16 +87,11 @@ module OssActiveRecord
       end
 
       def search(*args, &block)
-        yield unless block.nil?
-        params = {
-          'query' => args[0],
-          'start' => 0,
-          'rows' => 10,
-          'returnedFields' => @@_fields.map {|f|"#{f[:name]}|#{f[:type]}"}
-        }
-        active_record_from_result self.oss_index.search_pattern(params)
+        searchRequest = SearchRequest.new(self.oss_index, @@_text_fields, @@_sortable_fields)
+        searchRequest.returns @@_fields.map {|f|"#{f[:name]}|#{f[:type]}"}
+        active_record_from_result searchRequest.execute(&block)
       end
-      
+
       def get_ids_from_results(search_result)
         ids = []
         id_field_name = "#{@@_field_id[:name]}|#{@@_field_id[:type]}"
