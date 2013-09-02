@@ -1,8 +1,13 @@
-A very initial active_record intergration for OpenSearchServer http://www.open-search-server.com
+An active_record intergration for OpenSearchServer
 
 This is very very initial, but there is a running dummy application with test cases.
 
 Depends on jaeksoft/oss_rb
+
+## Requirement
+
+A running OpenSearchServer instance (>= v1.5)
+http://www.open-search-server.com
 
 ## Installation
 
