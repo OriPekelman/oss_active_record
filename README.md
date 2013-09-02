@@ -1,32 +1,32 @@
 A very initial active_record intergration for OpenSearchServer http://www.open-search-server.com
 
-This is very very initial, no tests yet, but there is a running dummy application
+This is very very initial, but there is a running dummy application with test cases.
 
-Depends on OriPekelman/oss_rb
+Depends on jaeksoft/oss_rb
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'oss_rb', :github => "OriPekelman/oss_rb"
-    gem 'oss_active_record', :github => "OriPekelman/oss_active_record"
+    gem 'oss_rb'
+    gem 'oss_active_record'
     
 
 And then execute:
 
     $ bundle
 
-Or install it yourself as (not on rubygems yet!):
+Or install it yourself as:
 
     $ gem install oss_active_record
 
 ## Configuration
+
 Add `config/initializers/oss_active_record.rb` with the url of opens-search-server
 
 	Rails.configuration.open_search_server_url = "http://localhost:8080"
 
 ## Usage
-
 
 ```ruby
 class Person < ActiveRecord::Base
