@@ -2,7 +2,7 @@ GIT
   remote: https://github.com/emmanuel-keller/oss_rb
   revision: fc29f72083004be1100e21ab4b5690a60924dc8c
   specs:
-    oss_rb (0.0.1)
+    oss_rb (0.1.0)
       activesupport
       rest-client
 

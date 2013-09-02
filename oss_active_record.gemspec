@@ -10,8 +10,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Ori Pekelman", "Emmanuel Keller"]
   s.email       = ["ori@pekelman.com", "ekeller@open-search-server.com"]
   s.homepage    = "http://www.open-search-server.com"
-  s.summary     = "Open search server ActiveRecord integration"
-  s.description = "Open search server ActiveRecord integration"
+  s.summary     = "OpenSearchServer ActiveRecord integration"
+  s.description = "OpenSearchServer ActiveRecord integration"
 
   s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
   s.test_files = Dir["test/**/*"]
