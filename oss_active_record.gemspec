@@ -7,8 +7,8 @@ require "oss_active_record/version"
 Gem::Specification.new do |s|
   s.name        = "oss_active_record"
   s.version     = OssActiveRecord::VERSION
-  s.authors     = ["Ori Pekelman"]
-  s.email       = ["ori@pekelman.com"]
+  s.authors     = ["Ori Pekelman", "Emmanuel Keller"]
+  s.email       = ["ori@pekelman.com", "ekeller@open-search-server.com"]
   s.homepage    = "http://www.open-search-server.com"
   s.summary     = "Open search server ActiveRecord integration"
   s.description = "Open search server ActiveRecord integration"
