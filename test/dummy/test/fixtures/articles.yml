@@ -2,12 +2,12 @@
 
 one:
   id: 1
-  title: Talking
-  content: My beautiful article
+  title: Weather report
+  content: Sunny weather today
   updated_at: 2013-07-11 17:06:19
 
 two:
   id: 2
-  title: Weather report
-  content: Another news about weather
+  title: Active record rocks
+  content: Using OpenSearchServer with active record is simple
   updated_at: 2013-07-11 17:06:19

@@ -12,4 +12,4 @@ gemspec
 
 # To use debugger
 gem 'pry'
-gem 'oss_rb', :git => "https://github.com/jaeksoft/oss_rb"
+gem 'oss_rb'

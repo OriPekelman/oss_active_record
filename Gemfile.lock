@@ -1,15 +1,8 @@
-GIT
-  remote: https://github.com/jaeksoft/oss_rb
-  revision: 227c80c3c56c945e0cd2a727ca7e373a7f3658c0
-  specs:
-    oss_rb (0.1.0)
-      activesupport
-      rest-client
-
 PATH
   remote: .
   specs:
     oss_active_record (0.1.0)
+      oss_rb (>= 0.1.0)
       rails (~> 4.0.0)
 
 GEM
@@ -53,6 +46,9 @@ GEM
     mime-types (1.25)
     minitest (4.7.5)
     multi_json (1.7.9)
+    oss_rb (0.1.0)
+      activesupport
+      rest-client
     polyglot (0.3.3)
     pry (0.9.12.2)
       coderay (~> 1.0.5)
@@ -102,6 +98,6 @@ PLATFORMS
 
 DEPENDENCIES
   oss_active_record!
-  oss_rb!
+  oss_rb
   pry
   sqlite3

@@ -82,7 +82,6 @@ module OssActiveRecord
       end
 
       def method_missing(method, *args, &block)
-        yield unless block.nil?
         add_field args[0], method, block if @@field_types.include? method
       end
 

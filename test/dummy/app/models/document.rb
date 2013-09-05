@@ -27,7 +27,8 @@ class Folder
 end
 
 class Document < ActiveRecord::Base
-  #  belongs_to :current_revision
+
+  belongs_to :current_revision
   def self.folder
     Folder.new
   end
