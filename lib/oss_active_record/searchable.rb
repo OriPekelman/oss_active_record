@@ -17,10 +17,23 @@ module OssActiveRecord
       @@_field_id = nil
       @@_text_fields = {}
       @@_sortable_fields = {}
+      @@_all_fields = {}
       @@index = nil
+
+      def _text_fields
+        @@_text_fields
+      end
 
       def _fields
         @@_fields
+      end
+
+      def find_sortable_name(field_name)
+        field == :score ? 'score' : @@_sortable_fields[field_name] unless field_name.nil?
+      end
+
+      def find_field_name(field_name)
+        @@_all_fields[field_name] unless field_name.nil?
       end
 
       def searchable(options = {}, &block)
@@ -33,7 +46,10 @@ module OssActiveRecord
       def oss_index
         if @@index.nil?
           @@index_name ||= self.name.downcase
-          @@index = Oss::Index.new(@@index_name, Rails.configuration.open_search_server_url)
+          @@index = Oss::Index.new(@@index_name,
+          Rails.configuration.open_search_server_url,
+          Rails.configuration.open_search_server_login,
+          Rails.configuration.open_search_server_apikey)
           create_schema!
         end
         @@index
@@ -63,7 +79,10 @@ module OssActiveRecord
       end
 
       def create_schema_field!(field)
-        analyzers = { :text => 'StandardAnalyzer',  :integer => 'DecimalAnalyzer'}
+        analyzers = {
+          :text => 'StandardAnalyzer',
+          :integer => 'IntegerAnalyzer',
+          :decimal => 'DecimalAnalyzer'}
         analyzer = analyzers[field[:type]] if field[:name] != :id
         termVectors = { :text => 'POSITIONS_OFFSETS'}
         termVector = termVectors[field[:type]] || 'NO'
@@ -77,6 +96,7 @@ module OssActiveRecord
         }
         @@_text_fields[field[:name]] = name if field[:type] == :text
         @@_sortable_fields[field[:name]] = name unless field[:type] == :text
+        @@_all_fields[field[:name]] = name
         self.oss_index.set_field(params)
         self.oss_index.set_field_default_unique(name, name) if field[:name] == :id
       end
@@ -86,7 +106,7 @@ module OssActiveRecord
       end
 
       def search(*args, &block)
-        searchRequest = SearchRequest.new(self.oss_index, @@_text_fields, @@_sortable_fields)
+        searchRequest = SearchRequest.new(self)
         searchRequest.returns @@_fields.map {|f|"#{f[:name]}|#{f[:type]}"}
         active_record_from_result searchRequest.execute(&block)
       end
