@@ -108,22 +108,19 @@ module OssActiveRecord
       def search(*args, &block)
         searchRequest = SearchRequest.new(self)
         searchRequest.returns @@_fields.map {|f|"#{f[:name]}|#{f[:type]}"}
-        active_record_from_result searchRequest.execute(&block)
+        find_results searchRequest.execute(&block)
       end
 
-      def get_ids_from_results(search_result)
-        ids = []
+      def find_results(search_result)
         id_field_name = "#{@@_field_id[:name]}|#{@@_field_id[:type]}"
+        results = []
         search_result['documents'].each do |document|
           document['fields'].each do |field|
-            ids << field['values'].map {|f|f.to_i}.uniq if field['fieldName'] == id_field_name
+            id = field['values'].map {|f|f.to_i}.uniq if field['fieldName'] == id_field_name
+            results<<find(id)[0] unless id.nil?
           end
         end
-        return ids
-      end
-
-      def active_record_from_result(search_result)
-        find get_ids_from_results(search_result)
+        return results
       end
 
     end

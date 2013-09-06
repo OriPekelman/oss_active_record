@@ -37,8 +37,8 @@ module OssActiveRecord
     end
 
     def order_by(field = nil, direction = :asc)
-      field = field == :score ? 'score' :@searchable.find_sortable_name(field)
-      @order_by[field.to_s] = direction.to_s.upcase unless field.nil?
+      index_field = field == :score ? 'score' :@searchable.find_sortable_name(field)
+      @order_by[index_field] = direction.to_s.upcase unless index_field.nil?
     end
 
     def execute(&block)

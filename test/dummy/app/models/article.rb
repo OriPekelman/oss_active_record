@@ -5,6 +5,7 @@ class Article < ActiveRecord::Base
     text     :title              # fulltext
     string   :title              # order_by
     text     :content            #fulltext
+    integer  :category_id
     time     :updated_at
   end
 

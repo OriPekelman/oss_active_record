@@ -7,13 +7,42 @@ class ArticleTest < ActiveSupport::TestCase
     Article.reindex!
   end
 
-  test "Index article" do
+  test "Full text search" do
 
-    result = Article.search do
+    results = Article.search do
       fulltext 'weather'
     end
-    assert result.length == 1
-    assert result[0]['title'] == 'Weather report'
+
+    puts results.inspect
+    assert results.length == 1, 'The number of result is wrong, should be one'
+    assert results[0][:title] == 'Weather report', 'The returned title is wrong'
+  end
+
+  test "Ascending order" do
+
+    results = Article.search do
+      order_by :category_id, :asc
+    end
+
+    cat_id = nil
+    results.each do |article|
+      assert(cat_id <= article[:category_id], 'Order is wrong') unless cat_id.nil?
+      cat_id = article[:category_id]
+    end
+  end
+
+  test "Descending order" do
+
+    results = Article.search do
+      order_by :category_id, :desc
+    end
+
+    cat_id = nil
+    results.each do |article|
+      assert(cat_id >= article[:category_id], 'Order is wrong') unless cat_id.nil?
+      cat_id = article[:category_id]
+    end
+
   end
 
 end

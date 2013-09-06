@@ -20,7 +20,6 @@ class DocumentTest < ActiveSupport::TestCase
          order_by :score, :desc
          order_by :id
        end
-       result.each { |document| puts document }
-       assert result.length == 2
+       assert result.length == 2, 'The number of document returned is wrong'
   end
 end
