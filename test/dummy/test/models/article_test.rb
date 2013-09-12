@@ -13,7 +13,6 @@ class ArticleTest < ActiveSupport::TestCase
       fulltext 'weather'
     end
 
-    puts results.inspect
     assert results.length == 1, 'The number of result is wrong, should be one'
     assert results[0][:title] == 'Weather report', 'The returned title is wrong'
   end

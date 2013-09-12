@@ -1,9 +1,9 @@
 module OssActiveRecord
   class SearchRequest
-    def initialize(searchable)
+    def initialize(index_instance)
       @params = {'start' => 0,  'rows' => 10}
       @filters = []
-      @searchable = searchable
+      @index_instance = index_instance
       @order_by = {}
     end
 
@@ -16,12 +16,12 @@ module OssActiveRecord
     end
 
     def with(field, value)
-      index_field = @searchable.find_field_name(field)
+      index_field = @index_instance.find_field_name(field)
       filter index_field, value, false unless index_field.nil?
     end
 
     def without(field, value)
-      index_field = @searchable.find_field_name(field)
+      index_field = @index_instance.find_field_name(field)
       filter index_field, value, true unless index_field.nil?
     end
 
@@ -37,7 +37,7 @@ module OssActiveRecord
     end
 
     def order_by(field = nil, direction = :asc)
-      index_field = field == :score ? 'score' :@searchable.find_sortable_name(field)
+      index_field = field == :score ? 'score' :@index_instance.find_sortable_name(field)
       @order_by[index_field] = direction.to_s.upcase unless index_field.nil?
     end
 
@@ -45,7 +45,7 @@ module OssActiveRecord
       self.instance_eval(&block) unless block.nil?
       @params['filters'] = @filters unless @filters.length == 0
       fields = []
-      @searchable._text_fields.each do |key, value|
+      @index_instance.text_fields.each do |key, value|
         fields<<{ "field"=> value,"phrase"=> true,"boost"=> 1.0}
       end
       @params['searchFields'] = fields unless fields.length == 0
@@ -54,7 +54,7 @@ module OssActiveRecord
         sorts<<{ "field"=> key,"direction"=> value}
       end
       @params['sorts'] = sorts unless sorts.length == 0
-      return @searchable.oss_index.search_field(@params)
+      return @index_instance.oss_index.search_field(@params)
     end
 
   end

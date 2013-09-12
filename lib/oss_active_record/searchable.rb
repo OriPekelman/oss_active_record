@@ -1,40 +1,9 @@
 module OssActiveRecord
   module Searchable
     extend ActiveSupport::Concern
-    def index
-      doc = self.to_indexable
-      oss_doc = Oss::Document.new
-      doc.each do |name,value|
-        oss_doc.fields << Oss::Field.new(name, value)
-      end
-      self.class.oss_index.documents << oss_doc
-      self.class.oss_index.index!
-    end
-
     module ClassMethods
       @@field_types= [:integer, :text, :string, :time] #supported field types
-      @@_fields=[]
-      @@_field_id = nil
-      @@_text_fields = {}
-      @@_sortable_fields = {}
-      @@_all_fields = {}
-      @@index = nil
-
-      def _text_fields
-        @@_text_fields
-      end
-
-      def _fields
-        @@_fields
-      end
-
-      def find_sortable_name(field_name)
-        field == :score ? 'score' : @@_sortable_fields[field_name] unless field_name.nil?
-      end
-
-      def find_field_name(field_name)
-        @@_all_fields[field_name] unless field_name.nil?
-      end
+      @@index_instances = {}
 
       def searchable(options = {}, &block)
         yield
@@ -43,76 +12,35 @@ module OssActiveRecord
         end
       end
 
-      def oss_index
-        if @@index.nil?
-          @@index_name ||= self.name.downcase
-          @@index = Oss::Index.new(@@index_name,
-          Rails.configuration.open_search_server_url,
-          Rails.configuration.open_search_server_login,
-          Rails.configuration.open_search_server_apikey)
-          create_schema!
+      def index_instance
+        idx_inst = @@index_instances[self.name.downcase]
+        if idx_inst.nil?
+          idx_inst = IndexInstance.new(self.name.downcase)
+          @@index_instances[self.name.downcase] = idx_inst
         end
-        @@index
-      end
-
-      def add_field(name, type, block=nil)
-        @@_fields<<{:name => name, :type => type,:block => block}
-      end
-
-      def create_schema!
-        @@index.create('EMPTY_INDEX') unless @@index.list.include? @@index_name
-        @@_field_id = @@_fields.detect {|f| f[:name] == :id }
-        @@_field_id = {:name => 'id', :type => 'integer',:block => nil} if @@_field_id.nil?
-        @@_fields <<  @@_field_id
-        @@_fields.each do |field|
-          create_schema_field!(field)
-        end
+        idx_inst
       end
 
       def reindex!
-        self.oss_index.delete!
-        self.create_schema!
-
+        index_instance.oss_index.delete!
+        index_instance.create_schema!
         self.all.find_in_batches  do |group|
-          group.each { |doc| doc.index }
+          group.each { |doc| doc.index(index_instance) }
         end
       end
 
-      def create_schema_field!(field)
-        analyzers = {
-          :text => 'StandardAnalyzer',
-          :integer => 'IntegerAnalyzer',
-          :decimal => 'DecimalAnalyzer'}
-        analyzer = analyzers[field[:type]] if field[:name] != :id
-        termVectors = { :text => 'POSITIONS_OFFSETS'}
-        termVector = termVectors[field[:type]] || 'NO'
-        name =  "#{field[:name]}|#{field[:type]}"
-        params = {
-          'name' => name,
-          'analyzer' => analyzer,
-          'stored' => 'NO',
-          'indexed' => 'YES',
-          'termVector' => termVector
-        }
-        @@_text_fields[field[:name]] = name if field[:type] == :text
-        @@_sortable_fields[field[:name]] = name unless field[:type] == :text
-        @@_all_fields[field[:name]] = name
-        self.oss_index.set_field(params)
-        self.oss_index.set_field_default_unique(name, name) if field[:name] == :id
-      end
-
       def method_missing(method, *args, &block)
-        add_field args[0], method, block if @@field_types.include? method
+        index_instance.add_field(args[0], method, block) if @@field_types.include? method
       end
 
       def search(*args, &block)
-        searchRequest = SearchRequest.new(self)
-        searchRequest.returns @@_fields.map {|f|"#{f[:name]}|#{f[:type]}"}
-        find_results searchRequest.execute(&block)
+        searchRequest = SearchRequest.new(index_instance)
+        searchRequest.returns index_instance.fields.map {|f|"#{f[:name]}|#{f[:type]}"}
+        find_results(searchRequest.execute(&block), index_instance.field_id)
       end
 
-      def find_results(search_result)
-        id_field_name = "#{@@_field_id[:name]}|#{@@_field_id[:type]}"
+      def find_results(search_result, field_id)
+        id_field_name = "#{field_id[:name]}|#{field_id[:type]}"
         results = []
         search_result['documents'].each do |document|
           document['fields'].each do |field|
@@ -122,12 +50,20 @@ module OssActiveRecord
         end
         return results
       end
-
     end
 
-    def to_indexable
+    def index(index_instance)
+      doc = self.to_indexable(index_instance.fields)
+      oss_doc = Oss::Document.new
+      doc.each do |name,value|
+        oss_doc.fields << Oss::Field.new(name, value)
+      end
+      index_instance.index(oss_doc)
+    end
+
+    def to_indexable(fields)
       doc={}
-      self.class._fields.each do |field|
+      fields.each do |field|
         if field[:block].nil?
           val = self.send(field[:name].to_sym)
         else

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    oss_active_record (0.1.0)
+    oss_active_record (0.1.2)
       oss_rb (>= 0.1.0)
       rails (~> 4.0.0)
 
