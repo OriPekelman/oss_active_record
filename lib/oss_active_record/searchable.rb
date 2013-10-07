@@ -2,7 +2,7 @@ module OssActiveRecord
   module Searchable
     extend ActiveSupport::Concern
     module ClassMethods
-      @@field_types= [:integer, :text, :string, :time] #supported field types
+      @@field_types= [:integer, :text, :string, :time, :suggestion] #supported field types
       @@index_instances = {}
 
       def searchable(options = {}, &block)
@@ -30,7 +30,8 @@ module OssActiveRecord
       end
 
       def method_missing(method, *args, &block)
-        index_instance.add_field(args[0], method, block) if @@field_types.include? method
+        return index_instance.add_field(args[0], method, block) if @@field_types.include? method
+        super
       end
 
       def search(*args, &block)

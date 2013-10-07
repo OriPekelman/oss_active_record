@@ -5,10 +5,24 @@ module OssActiveRecord
       @filters = []
       @index_instance = index_instance
       @order_by = {}
+      @fields = []
     end
 
     def fulltext(keywords, &block)
       @params['query'] = keywords
+      self.instance_eval(&block) unless block.nil?
+    end
+
+    def field(field, phrase = false, boost = 1.0)
+      @fields<<{ "field"=> @index_instance.find_field_name(field), "phrase" => phrase, "boost" => boost} if field.is_a?Symbol
+      @fields<<{ "field"=> field, "phrase" => phrase, "boost" => boost} if field.is_a?String
+    end
+
+    def fields(fields)
+      fields.each do |key, value|
+        field key, false, value
+      end if fields.is_a?Hash
+      field fields unless fields.is_a?Hash
     end
 
     def filter(field, value, negative)
@@ -44,11 +58,10 @@ module OssActiveRecord
     def execute(&block)
       self.instance_eval(&block) unless block.nil?
       @params['filters'] = @filters unless @filters.length == 0
-      fields = []
       @index_instance.text_fields.each do |key, value|
-        fields<<{ "field"=> value,"phrase"=> true,"boost"=> 1.0}
-      end
-      @params['searchFields'] = fields unless fields.length == 0
+        field value, true
+      end unless @fields.any?
+      @params['searchFields'] = @fields unless @fields.length == 0
       sorts = []
       @order_by.each do |key, value|
         sorts<<{ "field"=> key,"direction"=> value}

@@ -4,7 +4,8 @@ module OssActiveRecord
     @@_analyzers = {
       :text => 'StandardAnalyzer',
       :integer => 'IntegerAnalyzer',
-      :decimal => 'DecimalAnalyzer'}
+      :decimal => 'DecimalAnalyzer',
+      :suggestion => 'SuggestionAnalyzer'}
 
     def initialize(index_name)
       @_index_name ||= index_name

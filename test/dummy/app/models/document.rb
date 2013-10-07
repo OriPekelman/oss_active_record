@@ -44,6 +44,7 @@ class Document < ActiveRecord::Base
 
     text     :name              # fulltext
     string   :name              # order_by
+    suggestion :name            # Suggestion (autocompletion)
     time     :updated_at
 
     integer  :uuid              do current_revision.uuid end
