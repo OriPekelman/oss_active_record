@@ -40,7 +40,6 @@ module OssActiveRecord
       end
       alias_method :search, :oss_search
 
-      # FIXME: load all records in a single request then rebuild an ordered array.
       def find_results(search_result, field_id, options)
         id_field_name = "#{field_id[:name]}|#{field_id[:type]}"
 
