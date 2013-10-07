@@ -27,13 +27,13 @@ class Folder
 end
 
 class Document < ActiveRecord::Base
-
   belongs_to :current_revision
-  def self.folder
+
+  def folder
     Folder.new
   end
 
-  def self.current_revision
+  def current_revision
     CurrentRevision.new
   end
 
@@ -53,5 +53,4 @@ class Document < ActiveRecord::Base
     string   :file_content_type do current_revision.file_content_type end
     string   :state             do current_revision.state end
   end
-
 end
