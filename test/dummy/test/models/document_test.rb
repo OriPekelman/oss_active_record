@@ -7,12 +7,8 @@ class DocumentTest < ActiveSupport::TestCase
     Document.reindex!
   end
 
-  test "the truth" do
-    assert true
-  end
-
   test "Search document" do
-    result = Document.search(:include => { :current_revision => :user }) do
+    result = Document.search do
       fulltext 'document'
       with(:room_id, 42)
       without(:room_id, 43)
