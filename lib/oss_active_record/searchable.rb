@@ -1,6 +1,12 @@
 module OssActiveRecord
   module Searchable
     extend ActiveSupport::Concern
+
+    included do
+      extend ClassMethods
+      include InstanceMethods
+    end
+
     module ClassMethods
       @@field_types= [:integer, :text, :string, :time, :suggestion] #supported field types
       @@index_instances = {}
@@ -51,6 +57,7 @@ module OssActiveRecord
         end
         return results
       end
+      
     end
 
     def index(index_instance)
@@ -75,6 +82,14 @@ module OssActiveRecord
       doc
     end
 
+  end
+
+  #TODO Working on deletion
+  module InstanceMethods
+    def delete!
+      self.class.index_instance
+    end
+    alias :delete :delete!
   end
 end
 

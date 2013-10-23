@@ -44,4 +44,13 @@ class ArticleTest < ActiveSupport::TestCase
 
   end
 
+  test "Deletion" do
+
+    results = Article.search do
+      fulltext 'weather'
+    end
+
+    results[0].delete
+  end
+
 end
