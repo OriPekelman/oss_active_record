@@ -5,10 +5,9 @@ module OssActiveRecord
     extend ActiveSupport::Concern
 
     included do
-      extend ClassMethods
-      include InstanceMethods
+      after_destroy :oss_delete
     end
-    
+
     module ClassMethods
       @@oss_field_types = [:integer, :text, :string, :time, :suggestion] # supported field types
       @@oss_mutex = Mutex.new
@@ -54,16 +53,21 @@ module OssActiveRecord
         end.compact
 
         query = if options[:include]
-                  unscoped.includes(options[:include])
-                else
-                  unscoped
-                end
+          unscoped.includes(options[:include])
+        else
+          unscoped
+        end
         records = query.find(ids)
 
         ids.map do |id|
           records.find { |record| record.id == id.to_i }
         end
       end
+
+    end
+
+    def oss_delete
+      self.class.index_instance.delete_by_id(self.id)
     end
 
     def index
@@ -75,23 +79,16 @@ module OssActiveRecord
     def to_indexable
       self.class.index_instance.fields.reduce({}) do |doc, field|
         val = if field[:block].nil?
-                send(field[:name].to_sym)
-              else
-                instance_eval(&field[:block])
-              end
+          send(field[:name].to_sym)
+        else
+          instance_eval(&field[:block])
+        end
         doc["#{field[:name]}|#{field[:type]}"] = val
         doc
       end
     end
   end
 
-  #TODO Working on deletion
-  module InstanceMethods
-    def delete!
-      self.class.index_instance
-    end
-    alias :delete :delete!
-  end
 end
 
 ActiveRecord::Base.send :include, OssActiveRecord::Searchable

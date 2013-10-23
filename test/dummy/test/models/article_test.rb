@@ -50,7 +50,7 @@ class ArticleTest < ActiveSupport::TestCase
       fulltext 'weather'
     end
 
-    results[0].delete
+    results[0].destroy
   end
 
 end
