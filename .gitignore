@@ -10,3 +10,4 @@ test/dummy/.sass-cache
 /.DS_Store
 /.buildpath
 /oss_active_record-*.gem
+/Gemfile.lock
