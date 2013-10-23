@@ -2,12 +2,21 @@
 
 one:
   id: 1
-  title: Talking
-  content: My beautiful article
+  title: Weather report
+  content: Sunny weather today
+  category_id: 1
   updated_at: 2013-07-11 17:06:19
 
 two:
   id: 2
-  title: Weather report
-  content: Another news about weather
+  title: Active record rocks
+  content: Using OpenSearchServer with active record is simple
+  category_id: 2
+  updated_at: 2013-07-11 17:06:19
+
+three:
+  id: 3
+  title: Breaking news
+  content: A new version should be available soon
+  category_id: 1000
   updated_at: 2013-07-11 17:06:19

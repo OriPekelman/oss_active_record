@@ -1,18 +1,56 @@
 require_relative '../../../test_helper'
 
 class ArticleTest < ActiveSupport::TestCase
-  
-  test "Index" do
-    article = Article.new(id: 1, title: 'Weather report', content: 'Sunny weather today')
-    article.save
-    article = Article.new(id: 2, title: 'Active record rocks', content: 'Using OpenSearchServer with active record is simple')
-    article.save
-    
-    articles = Article.search do
-         fulltext 'weather'
-       end
-    assert articles.length == 1
-    assert articles[0]['title'] == 'Weather report'
+  fixtures :articles
+
+  setup do
+    Article.reindex!
   end
-  
+
+  test "Full text search" do
+
+    results = Article.search do
+      fulltext 'weather'
+    end
+
+    assert results.length == 1, 'The number of result is wrong, should be one'
+    assert results[0][:title] == 'Weather report', 'The returned title is wrong'
+  end
+
+  test "Ascending order" do
+
+    results = Article.search do
+      order_by :category_id, :asc
+    end
+
+    cat_id = nil
+    results.each do |article|
+      assert(cat_id <= article[:category_id], 'Order is wrong') unless cat_id.nil?
+      cat_id = article[:category_id]
+    end
+  end
+
+  test "Descending order" do
+
+    results = Article.search do
+      order_by :category_id, :desc
+    end
+
+    cat_id = nil
+    results.each do |article|
+      assert(cat_id >= article[:category_id], 'Order is wrong') unless cat_id.nil?
+      cat_id = article[:category_id]
+    end
+
+  end
+
+  test "Deletion" do
+
+    results = Article.search do
+      fulltext 'weather'
+    end
+
+    results[0].delete
+  end
+
 end
