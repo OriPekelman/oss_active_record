@@ -8,7 +8,7 @@ module OssActiveRecord
       extend ClassMethods
       include InstanceMethods
     end
-
+    
     module ClassMethods
       @@oss_field_types = [:integer, :text, :string, :time, :suggestion] # supported field types
       @@oss_mutex = Mutex.new
