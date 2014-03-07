@@ -52,6 +52,7 @@ module OssActiveRecord
       @_fields<<{:name => name, :type => type,:block => block}
     end
 
+    # FIXME: private method
     def create_schema!
       @_index.create('EMPTY_INDEX') unless @_index.list.include? @_index_name
       @_field_id =  @_fields.detect {|f| f[:name] == :id }
@@ -62,6 +63,7 @@ module OssActiveRecord
       end
     end
 
+    # FIXME: private method
     def create_schema_field!(field)
       analyzer = @@_analyzers[field[:type]] if field[:name] != :id
       termVectors = { :text => 'POSITIONS_OFFSETS'}
@@ -82,13 +84,14 @@ module OssActiveRecord
     end
 
     def index(docs)
-      @_index.documents << docs
-      @_index.index!
+      oss_index.documents << docs
+      oss_index.index!
     end
 
     def delete_by_id(id)
+      oss_index
       id_field = find_sortable_name(:id)
-      @_index.delete_document_by_value(id_field, id) unless id_field.nil?
+      oss_index.delete_document_by_value(id_field, id) unless id_field.nil?
     end
 
   end
