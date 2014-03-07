@@ -89,6 +89,7 @@ module OssActiveRecord
     end
 
     def delete_by_id(id)
+      oss_index
       id_field = find_sortable_name(:id)
       oss_index.delete_document_by_value(id_field, id) unless id_field.nil?
     end
