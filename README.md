@@ -1,3 +1,5 @@
+# [NOT MAINTAINED]
+
 A very initial active_record intergration for OpenSearchServer http://www.open-search-server.com
 
 This is very very initial, no tests yet, but there is a running dummy application
